@@ -1,0 +1,953 @@
+/* ==========================================================================
+   Batch 2 — Sport Universes: environments, particles, constellation,
+   interactive cards, universe pages, cinematic transitions
+   ========================================================================== */
+
+/* ---------- "All Sports" prism atmosphere ---------- */
+
+.atmosphere__prism {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--dur-slow) var(--ease-in-out);
+  background:
+    radial-gradient(40% 35% at 8% 20%, rgb(255 106 26 / 0.32), transparent 70%),
+    radial-gradient(40% 35% at 30% 95%, rgb(22 224 138 / 0.24), transparent 70%),
+    radial-gradient(35% 30% at 55% 10%, rgb(200 255 30 / 0.18), transparent 70%),
+    radial-gradient(40% 35% at 95% 30%, rgb(255 45 74 / 0.26), transparent 70%),
+    radial-gradient(40% 40% at 80% 95%, rgb(63 216 255 / 0.24), transparent 70%),
+    radial-gradient(35% 35% at 50% 55%, rgb(163 92 255 / 0.24), transparent 70%);
+}
+html[data-sport="all"] .atmosphere__prism {
+  opacity: 1;
+}
+
+.prism-dot {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #ff6a1a, #16e08a, #c8ff1e, #ff2d4a, #3fd8ff, #a35cff, #ff6a1a);
+  box-shadow: 0 0 18px rgb(255 200 61 / 0.6), inset 0 0 0 3px rgb(0 0 0 / 0.25);
+  animation: spin 14s linear infinite;
+}
+
+/* ---------- Particles ---------- */
+
+.particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.particles span {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  background: var(--accent-2);
+  opacity: 0;
+  animation: var(--t) linear var(--d) infinite;
+  will-change: transform, opacity;
+}
+
+/* NBA — embers rising from the hardwood */
+.particles--embers span {
+  top: 100%;
+  background: radial-gradient(circle, #fff6d8, var(--accent) 60%, transparent 70%);
+  box-shadow: 0 0 8px var(--accent);
+  animation-name: p-rise;
+}
+/* EuroLeague — flare sparks, fast and bright */
+.particles--sparks span {
+  top: 100%;
+  background: #ffd2f5;
+  box-shadow: 0 0 10px var(--accent), 0 0 20px #ff3b5c;
+  animation-name: p-rise;
+  animation-duration: calc(var(--t) * 0.6);
+}
+/* NHL — snow / ice crystals falling */
+.particles--snow span {
+  top: -2%;
+  background: #f2fdff;
+  box-shadow: 0 0 6px var(--accent-2);
+  animation-name: p-fall;
+}
+/* Soccer — floodlit drizzle streaks */
+.particles--drizzle span {
+  top: -5%;
+  width: 1.5px;
+  height: calc(var(--s) * 9);
+  border-radius: 2px;
+  background: linear-gradient(180deg, transparent, var(--accent-2));
+  animation-name: p-drizzle;
+  animation-duration: calc(var(--t) * 0.22);
+}
+/* NFL — stadium light dust */
+.particles--dust span {
+  background: var(--accent-2);
+  box-shadow: 0 0 6px var(--accent);
+  animation-name: p-float;
+}
+/* MLB — summer-dusk motes, slow and warm */
+.particles--motes span {
+  background: #ffe2b8;
+  box-shadow: 0 0 10px #ff9a6b;
+  animation-name: p-float;
+  animation-duration: calc(var(--t) * 1.6);
+}
+/* All — prism motes in every sport colour */
+.particles--prism span {
+  animation-name: p-float;
+}
+.particles--prism span:nth-child(6n + 1) { background: #ff6a1a; box-shadow: 0 0 8px #ff6a1a; }
+.particles--prism span:nth-child(6n + 2) { background: #16e08a; box-shadow: 0 0 8px #16e08a; }
+.particles--prism span:nth-child(6n + 3) { background: #c8ff1e; box-shadow: 0 0 8px #c8ff1e; }
+.particles--prism span:nth-child(6n + 4) { background: #ff2d4a; box-shadow: 0 0 8px #ff2d4a; }
+.particles--prism span:nth-child(6n + 5) { background: #3fd8ff; box-shadow: 0 0 8px #3fd8ff; }
+.particles--prism span:nth-child(6n + 6) { background: #a35cff; box-shadow: 0 0 8px #a35cff; }
+
+@keyframes p-rise {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  10% { opacity: 0.9; }
+  80% { opacity: 0.6; }
+  100% { transform: translate3d(var(--drift), -105vh, 0); opacity: 0; }
+}
+@keyframes p-fall {
+  0% { transform: translate3d(0, 0, 0) rotate(0); opacity: 0; }
+  10% { opacity: 0.85; }
+  100% { transform: translate3d(var(--drift), 105vh, 0) rotate(240deg); opacity: 0.2; }
+}
+@keyframes p-drizzle {
+  0% { transform: translate3d(0, 0, 0) rotate(12deg); opacity: 0; }
+  15% { opacity: 0.7; }
+  100% { transform: translate3d(calc(var(--drift) - 120px), 110vh, 0) rotate(12deg); opacity: 0; }
+}
+@keyframes p-float {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  30% { opacity: 0.75; }
+  70% { opacity: 0.5; }
+  100% { transform: translate3d(var(--drift), -18vh, 0); opacity: 0; }
+}
+
+/* ---------- Arena environment ---------- */
+
+.scene__env {
+  position: absolute;
+  inset: -6% -4% 10% -4%;
+}
+.arena {
+  width: 100%;
+  height: 100%;
+  opacity: 0.9;
+}
+.arena__crowd {
+  filter: blur(0.6px);
+}
+.arena__flash {
+  animation: flash 6s steps(1) infinite;
+}
+@keyframes flash {
+  0%, 96% { opacity: 0.15; }
+  97% { opacity: 1; }
+}
+.arena__lamp {
+  animation: lamp 5s var(--ease-in-out) infinite alternate;
+}
+@keyframes lamp {
+  to { opacity: 0.6; }
+}
+.arena__bulb {
+  animation: bulb 3.6s var(--ease-in-out) infinite alternate;
+}
+@keyframes bulb {
+  to { opacity: 0.55; }
+}
+.arena__flare {
+  animation: flare 0.9s steps(3) infinite alternate;
+}
+@keyframes flare {
+  to { opacity: 0.55; transform: translateY(-3px); }
+}
+.arena__smoke {
+  animation: smoke 16s var(--ease-in-out) infinite alternate;
+}
+@keyframes smoke {
+  to { transform: translateX(80px); }
+}
+.arena__screen {
+  animation: lamp 2.4s var(--ease-in-out) infinite alternate;
+}
+.arena__pennant {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: pennant 1.6s var(--ease-in-out) infinite alternate;
+}
+@keyframes pennant {
+  to { transform: skewY(8deg) scaleX(0.85); }
+}
+
+/* Environment sits behind the hero object but above the atmosphere */
+.scene--hero .scene__env,
+.scene--banner .scene__env {
+  opacity: 0.85;
+}
+.scene--banner .scene__env {
+  inset: -20% -4% 0 -4%;
+}
+
+/* ---------- All Sports constellation ---------- */
+
+.constellation {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  animation: float 7s var(--ease-in-out) infinite alternate;
+}
+.constellation::before {
+  content: "";
+  position: absolute;
+  inset: 18%;
+  border-radius: 50%;
+  border: 1px dashed rgb(255 255 255 / 0.25);
+  animation: spin 60s linear infinite;
+}
+.constellation__orb {
+  position: absolute;
+  width: 34%;
+  aspect-ratio: 1;
+  transition: transform var(--dur-med) var(--ease-out);
+}
+.constellation__orb .scene__ball {
+  filter: drop-shadow(0 20px 30px rgb(0 0 0 / 0.6)) drop-shadow(0 0 30px color-mix(in oklab, var(--accent) 55%, transparent));
+}
+.constellation__orb--0 { left: 33%; top: 0%; }
+.constellation__orb--1 { left: 64%; top: 18%; animation: float 5s var(--ease-in-out) infinite alternate; }
+.constellation__orb--2 { left: 64%; top: 52%; }
+.constellation__orb--3 { left: 33%; top: 66%; animation: float 6s var(--ease-in-out) infinite alternate-reverse; }
+.constellation__orb--4 { left: 2%; top: 52%; }
+.constellation__orb--5 { left: 2%; top: 18%; animation: float 5.5s var(--ease-in-out) infinite alternate; }
+
+/* ---------- Sidebar universe badge ---------- */
+
+.sidebar__universe {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 58px;
+  padding: 0 4px;
+  margin-bottom: 4px;
+  border-radius: 16px;
+  white-space: nowrap;
+  background: color-mix(in oklab, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--accent) 35%, transparent);
+  transition: background var(--dur-fast);
+}
+.sidebar__universe:hover {
+  background: color-mix(in oklab, var(--accent) 24%, transparent);
+}
+.sidebar__universe-ball {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 6px;
+}
+.sidebar__universe-ball svg {
+  width: 100%;
+  height: 100%;
+  animation: spin 30s linear infinite;
+}
+.sidebar__universe-text {
+  display: grid;
+  line-height: 1.1;
+}
+.sidebar__universe-text small {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+/* ---------- Switcher additions ---------- */
+
+.sport-switch__btn--all .sport-switch__dot {
+  background: conic-gradient(#ff6a1a, #16e08a, #c8ff1e, #ff2d4a, #3fd8ff, #a35cff, #ff6a1a);
+  box-shadow: 0 0 10px rgb(255 200 61 / 0.7);
+}
+.sport-tile--all {
+  grid-column: 1 / -1;
+  min-height: 112px;
+}
+.sport-tile--all .sport-tile__ball {
+  width: 84px;
+  height: 84px;
+  right: 18px;
+  bottom: 14px;
+}
+.sheet__cta {
+  width: 100%;
+  margin-top: 14px;
+}
+
+/* ---------- Tilt + shine (posters, portals) ---------- */
+
+.tilt {
+  --rx: 0deg;
+  --ry: 0deg;
+  --mx: 50%;
+  --my: 50%;
+  transform: perspective(1000px) rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform 500ms var(--ease-out), box-shadow var(--dur-med) var(--ease-out);
+  transform-style: preserve-3d;
+}
+.tilt:hover {
+  transition: transform 120ms linear, box-shadow var(--dur-med) var(--ease-out);
+}
+.portal__shine {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(40% 50% at var(--mx) var(--my), rgb(255 255 255 / 0.22), transparent 70%);
+  opacity: 0;
+  transition: opacity var(--dur-med);
+  mix-blend-mode: overlay;
+}
+.tilt:hover .portal__shine {
+  opacity: 1;
+}
+
+/* Poster now = container with a stretched hit button and a universe link */
+.poster {
+  cursor: pointer;
+}
+.poster:hover {
+  transform: perspective(1000px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-8px);
+}
+.poster__hit {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+}
+.poster__hit:focus-visible {
+  outline-offset: -4px;
+}
+.poster__num,
+.poster__body {
+  pointer-events: none;
+  z-index: 3;
+}
+.poster__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+.poster__cta {
+  margin-top: 0;
+}
+.poster__link {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.8rem;
+  background: var(--accent);
+  color: var(--accent-ink);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.poster__link:hover {
+  transform: translateX(3px);
+}
+
+/* Home portal */
+.portal {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: min(76svh, 640px);
+  padding: 28px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(90% 80% at 75% 20%, color-mix(in oklab, var(--haze) 55%, transparent), transparent 70%),
+    linear-gradient(180deg, var(--deep-2), var(--deep));
+  box-shadow: 0 40px 90px -40px var(--accent), inset 0 0 0 1px color-mix(in oklab, var(--accent) 40%, transparent);
+}
+@media (min-width: 768px) {
+  .portal { padding: 56px; }
+}
+.portal .scene {
+  z-index: -1;
+}
+.portal .scene--poster .scene__object-wrap {
+  width: min(48%, 520px);
+  right: 4%;
+  top: 6%;
+}
+.portal__body {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 16px;
+  max-width: 640px;
+}
+.portal__title {
+  line-height: 0.88;
+}
+.portal__go {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--accent-2);
+  transition: gap var(--dur-med) var(--ease-out);
+}
+.portal:hover .portal__go {
+  gap: 18px;
+}
+
+/* ---------- In-page sport picker ---------- */
+
+.sport-picker {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.sport-picker__row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+.sport-picker__chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 16px 0 6px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  background: color-mix(in oklab, var(--accent) 12%, rgb(0 0 0 / 0.3));
+  border: 1.5px solid color-mix(in oklab, var(--accent) 35%, transparent);
+  transition: background var(--dur-fast), transform var(--dur-fast);
+}
+.sport-picker__chip:hover {
+  transform: translateY(-2px);
+}
+.sport-picker__chip.is-active {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+.sport-picker__ball {
+  width: 34px;
+  height: 34px;
+}
+
+/* ---------- Universe hero ---------- */
+
+.universe {
+  position: relative;
+}
+
+.uhero {
+  position: relative;
+  min-height: calc(100svh - var(--topbar-h));
+  display: flex;
+  align-items: flex-end;
+  padding: 40px 0 56px;
+  overflow: hidden;
+}
+.scene--universe {
+  -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+}
+.scene--universe .scene__object-wrap {
+  width: min(46vw, 640px);
+  right: 6%;
+  top: 12%;
+}
+.scene--universe .scene__floor-wrap {
+  height: 80%;
+}
+@media (max-width: 899px) {
+  .scene--universe .scene__object-wrap {
+    width: 86vw;
+    right: -16%;
+    top: 4%;
+  }
+}
+
+.uhero__ghost {
+  position: absolute;
+  left: -2vw;
+  top: 4vh;
+  font-size: clamp(10rem, 34vw, 34rem);
+  line-height: 0.8;
+  color: transparent;
+  -webkit-text-stroke: 2px color-mix(in oklab, var(--accent) 35%, transparent);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 1;
+  animation: ghost-in 1400ms var(--ease-out) both;
+}
+@keyframes ghost-in {
+  from { opacity: 0; letter-spacing: 0.2em; }
+}
+
+.uhero__inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 28px;
+}
+@media (min-width: 1000px) {
+  .uhero__inner {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    align-items: end;
+  }
+}
+.uhero__copy {
+  display: grid;
+  gap: 20px;
+}
+.uhero__title {
+  display: grid;
+  font-size: clamp(3rem, 15vw, 6.5rem);
+}
+@media (min-width: 900px) {
+  .uhero__title { font-size: clamp(5rem, 9.5vw, 12rem); }
+}
+.uhero__kicker,
+.uhero__lede,
+.uhero__ctas {
+  animation: hero-fade 900ms var(--ease-out) both;
+}
+.uhero__lede { animation-delay: 260ms; }
+.uhero__ctas { animation-delay: 360ms; }
+
+.uhero__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+@media (min-width: 1000px) {
+  .uhero__chips {
+    position: relative;
+    display: block;
+    height: 380px;
+  }
+  .uhero__chip {
+    position: absolute;
+    animation: chip-in 900ms var(--ease-out) both, bob 7s var(--ease-in-out) infinite alternate;
+  }
+  .uhero__chip--0 { top: 0; right: 36%; animation-delay: 500ms, 0s; }
+  .uhero__chip--1 { top: 40%; right: 0; animation-delay: 650ms, 1.4s; }
+  .uhero__chip--2 { bottom: 0; right: 46%; animation-delay: 800ms, 2.6s; }
+}
+@media (max-width: 999px) {
+  .uhero__chip { flex: 1 1 120px; min-width: 0; }
+  .uhero__chip .float-stat__value { font-size: 1.5rem; }
+}
+
+/* ---------- Rules (layered statistics, staggered depth) ---------- */
+
+.rules {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, 1fr);
+}
+@media (min-width: 1000px) {
+  .rules {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  .rule--1 { margin-top: 72px; }
+  .rule--2 { margin-top: -20px; }
+  .rule--3 { margin-top: 110px; }
+}
+.rule__inner {
+  display: grid;
+  gap: 6px;
+  min-height: 200px;
+  align-content: end;
+}
+.rule--0 .rule__inner,
+.rule--3 .rule__inner {
+  background:
+    radial-gradient(90% 120% at 0% 100%, color-mix(in oklab, var(--accent-ink) 40%, transparent), transparent 60%),
+    linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent) 50%, var(--haze)));
+  color: var(--accent-ink);
+}
+.rule__value {
+  font-size: clamp(3.4rem, 7vw, 6.5rem);
+  line-height: 0.9;
+}
+.rule__label {
+  font-weight: 800;
+}
+
+/* ---------- Language ---------- */
+
+.lang {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 1000px) {
+  .lang {
+    grid-template-columns: 1.2fr 1fr;
+    gap: 20px;
+  }
+  .lang .section-head {
+    grid-column: 1 / -1;
+  }
+}
+.terms {
+  display: grid;
+  margin: 18px 0 0;
+}
+.terms__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.terms__row dt {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.terms__row dd {
+  margin: 0;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  color: var(--accent);
+  text-align: right;
+}
+.positions {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+.positions li {
+  display: grid;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.2);
+  transition: transform var(--dur-fast) var(--ease-out), background var(--dur-fast);
+}
+.positions li:hover {
+  transform: translateY(-3px);
+  background: rgb(255 255 255 / 0.32);
+}
+.positions .display {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+.positions small {
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+/* ---------- Scoring chips ---------- */
+
+.scoring-chips {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+.scoring-chip {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  border-radius: 20px;
+  font-weight: 800;
+  background: color-mix(in oklab, var(--accent) 12%, rgb(0 0 0 / 0.3));
+  border: 1px solid color-mix(in oklab, var(--accent) 35%, transparent);
+}
+.scoring-chip__pts {
+  min-width: 2.6ch;
+  font-size: 2.2rem;
+  color: var(--accent);
+}
+.uplatforms {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+.uplatforms .panel__text {
+  flex: 1 1 320px;
+}
+
+/* ---------- Universe portals ---------- */
+
+.uportal {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 360px;
+  padding: 24px;
+  border-radius: var(--radius-l);
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: 0 30px 70px -30px rgb(0 0 0 / 0.9), inset 0 0 0 1px color-mix(in oklab, var(--accent) 40%, transparent);
+}
+.uportal:hover {
+  box-shadow: 0 40px 90px -30px var(--accent), inset 0 0 0 2px var(--accent);
+}
+.uportal .scene {
+  z-index: -1;
+}
+.uportal__body {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 6px;
+}
+.uportal__dir {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.uportal__name {
+  font-size: clamp(2.6rem, 5vw, 4.4rem);
+}
+.unext {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 900px) {
+  .unext {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .uportal--next {
+    text-align: right;
+    justify-content: flex-end;
+  }
+  .uportal--next .uportal__body {
+    justify-items: end;
+  }
+  .uportal--prev .scene__object-wrap {
+    right: auto;
+    left: -14%;
+  }
+}
+.uportals {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 700px) {
+  .uportals { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1200px) {
+  .uportals { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .uportals > :nth-child(3n + 2) { margin-top: 56px; }
+}
+
+/* ---------- Comparison table ---------- */
+
+.compare {
+  padding: 8px;
+}
+@media (min-width: 768px) {
+  .compare { padding: 12px 20px; }
+}
+.compare__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.compare__table th,
+.compare__table td {
+  padding: 16px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+.compare__table thead th {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 600;
+}
+.compare__table tbody tr {
+  transition: background var(--dur-fast);
+}
+.compare__table tbody tr:hover {
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+}
+.compare__table tbody td {
+  font-weight: 700;
+}
+.compare__sport {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.compare__ball {
+  width: 34px;
+  height: 34px;
+}
+@media (max-width: 640px) {
+  .compare__table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .compare__table tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 12px 4px;
+    border-bottom: 1px solid var(--line);
+  }
+  .compare__table th,
+  .compare__table td {
+    border: 0;
+    padding: 4px 8px;
+  }
+  .compare__table th {
+    grid-column: 1 / -1;
+  }
+  .compare__table td::before {
+    content: attr(data-label);
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 600;
+  }
+}
+
+/* ---------- Dictionary ---------- */
+
+.dict {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 700px) {
+  .dict { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1200px) {
+  .dict { grid-template-columns: repeat(3, 1fr); }
+}
+.dict__list {
+  display: grid;
+  gap: 2px;
+  margin: 14px 0;
+}
+.dict__list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.dict__list dt {
+  color: var(--ink-3);
+  font-size: 0.86rem;
+}
+.dict__list dd {
+  margin: 0;
+  font-weight: 800;
+  color: var(--accent-2);
+}
+.dict__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ---------- Universe route transition: zoom through the portal ---------- */
+
+::view-transition-old(.universe-out) {
+  animation: 420ms var(--ease-in-out) both vt-zoom-out;
+}
+::view-transition-new(.universe-in) {
+  animation: 760ms var(--ease-out) 120ms both vt-zoom-in;
+}
+@keyframes vt-zoom-out {
+  to {
+    opacity: 0;
+    transform: scale(1.12);
+    filter: blur(14px) brightness(1.4);
+  }
+}
+@keyframes vt-zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+    filter: blur(10px);
+  }
+}
+
+/* ---------- Performance: skip rendering far-offscreen sections ---------- */
+
+.section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
+/* ---------- Reduced motion: no particles, no tilt ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]) .particles {
+    display: none;
+  }
+  html:not([data-motion="full"]) .tilt {
+    transform: none !important;
+  }
+}
+html[data-motion="reduced"] .particles {
+  display: none;
+}
+html[data-motion="reduced"] .tilt {
+  transform: none !important;
+}
+
+/* Dashboard hero: object sits a little smaller so the arena reads around it */
+@media (min-width: 900px) {
+  .scene--hero .scene__object-wrap {
+    width: min(40vw, 540px);
+    top: 16%;
+  }
+}

@@ -1,0 +1,135 @@
+/* ==========================================================================
+   UniFantasy design tokens
+   - Brand-level tokens are constant across sports.
+   - Sport tokens are registered custom properties so they can animate when
+     [data-sport] changes. Any element can scope a theme with data-sport="…".
+   ========================================================================== */
+
+@property --accent { syntax: "<color>"; inherits: true; initial-value: #ff6a1a; }
+@property --accent-2 { syntax: "<color>"; inherits: true; initial-value: #ffb070; }
+@property --accent-ink { syntax: "<color>"; inherits: true; initial-value: #1c0903; }
+@property --deep { syntax: "<color>"; inherits: true; initial-value: #1c0903; }
+@property --deep-2 { syntax: "<color>"; inherits: true; initial-value: #3a1206; }
+@property --haze { syntax: "<color>"; inherits: true; initial-value: #ff3d00; }
+@property --cool { syntax: "<color>"; inherits: true; initial-value: #2a0e3a; }
+
+:root {
+  /* Brand constants */
+  --ink: #fbf7f2;
+  --ink-2: rgb(251 247 242 / 0.78);
+  --ink-3: rgb(251 247 242 / 0.6);
+  --line: rgb(255 255 255 / 0.14);
+  --line-strong: rgb(255 255 255 / 0.26);
+
+  --font-display: var(--font-anton), "Impact", "Arial Narrow", sans-serif;
+  --font-body: var(--font-manrope), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --radius-s: 10px;
+  --radius-m: 18px;
+  --radius-l: 28px;
+  --radius-xl: 40px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 180ms;
+  --dur-med: 420ms;
+  --dur-slow: 900ms;
+
+  --sidebar-w: 84px;
+  --sidebar-w-open: 248px;
+  --topbar-h: 68px;
+  --bottomnav-h: 76px;
+
+  --z-atmo: 0;
+  --z-content: 1;
+  --z-topbar: 40;
+  --z-nav: 50;
+  --z-sheet: 80;
+}
+
+/* ---------- Sport themes ---------- */
+
+[data-sport="nba"] {
+  --accent: #ff6a1a;
+  --accent-2: #ffb070;
+  --accent-ink: #1f0a02;
+  --deep: #1c0903;
+  --deep-2: #4a1707;
+  --haze: #ff3d00;
+  --cool: #3b0f2e;
+}
+
+[data-sport="nfl"] {
+  --accent: #16e08a;
+  --accent-2: #8dffc4;
+  --accent-ink: #02170d;
+  --deep: #03170d;
+  --deep-2: #0a3d24;
+  --haze: #00b86b;
+  --cool: #062a3a;
+}
+
+[data-sport="soccer"] {
+  --accent: #c8ff1e;
+  --accent-2: #5ee87f;
+  --accent-ink: #111a02;
+  --deep: #0a1604;
+  --deep-2: #1f4210;
+  --haze: #7bdc1a;
+  --cool: #04302a;
+}
+
+[data-sport="mlb"] {
+  --accent: #ff2d4a;
+  --accent-2: #ff9a6b;
+  --accent-ink: #1e0207;
+  --deep: #1a0308;
+  --deep-2: #4d0b18;
+  --haze: #e0102f;
+  --cool: #1d0b3b;
+}
+
+[data-sport="nhl"] {
+  --accent: #3fd8ff;
+  --accent-2: #b4f2ff;
+  --accent-ink: #011722;
+  --deep: #021522;
+  --deep-2: #073d5c;
+  --haze: #0098e0;
+  --cool: #10204a;
+}
+
+[data-sport="euroleague"] {
+  --accent: #a35cff;
+  --accent-2: #e19bff;
+  --accent-ink: #12052b;
+  --deep: #100626;
+  --deep-2: #33116b;
+  --haze: #7b2bff;
+  --cool: #3a0a3a;
+}
+
+/* "All Sports" universe: championship gold over a prism of every sport */
+[data-sport="all"] {
+  --accent: #ffc83d;
+  --accent-2: #fff0b8;
+  --accent-ink: #1a1204;
+  --deep: #120d1c;
+  --deep-2: #2a1a3a;
+  --haze: #ff7a2f;
+  --cool: #10304a;
+}
+
+/* Smoothly blend tokens on sport change (also covers browsers without
+   View Transitions). */
+html {
+  transition:
+    --accent var(--dur-slow) var(--ease-in-out),
+    --accent-2 var(--dur-slow) var(--ease-in-out),
+    --accent-ink var(--dur-slow) var(--ease-in-out),
+    --deep var(--dur-slow) var(--ease-in-out),
+    --deep-2 var(--dur-slow) var(--ease-in-out),
+    --haze var(--dur-slow) var(--ease-in-out),
+    --cool var(--dur-slow) var(--ease-in-out);
+}
