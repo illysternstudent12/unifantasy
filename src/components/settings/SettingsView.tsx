@@ -18,6 +18,8 @@ import {
 } from "@/lib/preferences";
 import { DEFAULT_SPORT, SPORT_LIST } from "@/lib/sports";
 import { cn } from "@/lib/cn";
+import Link from "next/link";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const MOTION: { id: MotionPref; label: string }[] = [
   { id: "system", label: "Match system" },
@@ -29,6 +31,7 @@ export function SettingsView() {
   const sport = useSelection();
   const prefs = usePrefs();
   const reduced = useReducedMotion();
+  const { status, profile } = useAuth();
 
   const toggleFav = (id: (typeof SPORT_LIST)[number]["id"]) =>
     updatePrefs({
@@ -39,7 +42,7 @@ export function SettingsView() {
 
   return (
     <>
-      <PageHero kicker="Settings" title="Make it" outline="Yours" lede="Themes, motion and layout preferences. Saved on this device only — there are no accounts in this build." />
+      <PageHero kicker="Settings" title="Make it" outline="Yours" lede="Display preferences for this device — theme, motion and layout. Profile and interests live in your Account." />
 
       <section className="section section--tight">
         <div className="container settings">
@@ -73,20 +76,37 @@ export function SettingsView() {
             </div>
           </Group>
 
-          <Group title="Sports you follow" hint="Used to prioritise sports across the app as later batches add content.">
-            <div className="fav-list">
-              {SPORT_LIST.map((s) => {
-                const on = prefs.favoriteSports.includes(s.id);
-                return (
-                  <button key={s.id} data-sport={s.id} className={cn("fav", on && "is-on")} aria-pressed={on} onClick={() => toggleFav(s.id)}>
+          {status === "signed-in" ? (
+            <Group title="Sports you follow" hint="Saved to your account — they order the sport switcher and personalise your dashboard.">
+              <div className="fav-list">
+                {SPORT_LIST.filter((s) => profile?.favorite_sports.includes(s.id)).map((s) => (
+                  <span key={s.id} data-sport={s.id} className="fav is-on">
                     <span className="fav__dot" aria-hidden="true" />
                     {s.league}
-                    {on && <Check size={16} aria-hidden="true" />}
-                  </button>
-                );
-              })}
-            </div>
-          </Group>
+                  </span>
+                ))}
+                {!profile?.favorite_sports.length && <span className="field__hint">None yet.</span>}
+              </div>
+              <Link href="/account" className="text-link">
+                Edit in Account →
+              </Link>
+            </Group>
+          ) : (
+            <Group title="Sports you follow" hint="Saved on this device. Sign in to keep them with your account.">
+              <div className="fav-list">
+                {SPORT_LIST.map((s) => {
+                  const on = prefs.favoriteSports.includes(s.id);
+                  return (
+                    <button key={s.id} data-sport={s.id} className={cn("fav", on && "is-on")} aria-pressed={on} onClick={() => toggleFav(s.id)}>
+                      <span className="fav__dot" aria-hidden="true" />
+                      {s.league}
+                      {on && <Check size={16} aria-hidden="true" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </Group>
+          )}
 
           <Group title="Motion" hint={`Animations, transitions and parallax. Currently ${reduced ? "reduced" : "full"}.`}>
             <div className="segmented" role="radiogroup" aria-label="Motion preference">
@@ -128,8 +148,8 @@ export function SettingsView() {
           <Reveal className="panel panel--glass about">
             <span className="kicker">About this build</span>
             <p className="panel__text">
-              UniFantasy · Batch 2 — Sport Universes. No accounts, APIs, databases, live sports data, integrations or
-              prediction models are included yet.
+              UniFantasy · Batch 3 — accounts and onboarding. No live sports data, platform integrations or prediction
+              models are included yet.
             </p>
           </Reveal>
         </div>

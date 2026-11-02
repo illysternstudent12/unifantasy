@@ -9,7 +9,9 @@ import { SPORT_LIST } from "@/lib/sports";
 import { PLATFORMS, platformsFor } from "@/lib/platforms";
 import { useParallax, useTilt } from "@/lib/motion";
 import { useSwitchUniverse } from "@/lib/use-switch";
-import { SELECTIONS, metaFor, universeHref } from "@/lib/universe";
+import { metaFor, orderedSelections, universeHref } from "@/lib/universe";
+import { PersonalStrip } from "./PersonalStrip";
+import { useAuth } from "@/components/auth/AuthProvider";
 import type { Sport } from "@/lib/sports";
 import { UniverseGlyph } from "@/components/shell/SportSwitcher";
 import { cn } from "@/lib/cn";
@@ -24,6 +26,7 @@ export function HomeView() {
   return (
     <>
       <Hero />
+      <PersonalStrip />
       <Marquee words={words} />
       <SeasonBoard />
       <UniversePortal />
@@ -59,6 +62,8 @@ export function HomeView() {
 function Hero() {
   const { selection, sport, meta } = useUniverse();
   const switchTo = useSwitchUniverse();
+  const { profile } = useAuth();
+  const reel = orderedSelections(profile?.favorite_sports ?? []);
   const chipsRef = useParallax<HTMLDivElement>(-0.06);
   const available = sport ? platformsFor(sport.id).length : PLATFORMS.length;
 
@@ -106,7 +111,7 @@ function Hero() {
 
       <div className="container hero__reel-wrap">
         <div className="hero__reel" role="radiogroup" aria-label="Switch universe">
-          {SELECTIONS.map((id, i) => (
+          {reel.map((id, i) => (
             <button
               key={id}
               role="radio"
@@ -115,7 +120,10 @@ function Hero() {
               className={cn("hero__reel-item", id === selection && "is-active")}
               onClick={(e) => switchTo(id, { x: e.clientX || window.innerWidth / 2, y: e.clientY || window.innerHeight / 2 })}
             >
-              <span className="hero__reel-num mono">{i === 0 ? "ALL" : String(i).padStart(2, "0")}</span>
+              <span className="hero__reel-num mono">
+                {i === 0 ? "ALL" : String(i).padStart(2, "0")}
+                {id !== "all" && profile?.favorite_sports.includes(id) ? " ★" : ""}
+              </span>
               <span className="hero__reel-name">{metaFor(id).league}</span>
               <span className="hero__reel-bar" aria-hidden="true" />
             </button>

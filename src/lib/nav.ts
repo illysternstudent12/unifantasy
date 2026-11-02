@@ -44,6 +44,18 @@ export function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
 }
 
-export function navFor(pathname: string) {
+/** Pages outside the main nav still need an honest breadcrumb label. */
+const EXTRA_TITLES: Record<string, string> = {
+  "/login": "Sign in",
+  "/register": "Create account",
+  "/forgot-password": "Reset password",
+  "/reset-password": "New password",
+  "/onboarding": "Setup",
+  "/account": "Account",
+};
+
+export function navFor(pathname: string): Pick<NavItem, "label"> {
+  const extra = EXTRA_TITLES[pathname];
+  if (extra) return { label: extra };
   return NAV.find((n) => isActive(pathname, n.href)) ?? NAV[0];
 }

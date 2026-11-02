@@ -150,3 +150,10 @@ export const TERM_LABELS: { key: keyof Terms; label: string }[] = [
   { key: "moves", label: "Player moves" },
   { key: "unit", label: "Scoring period" },
 ];
+
+/** "All", then the user's favourite sports, then the rest — every sport stays available. */
+export function orderedSelections(favorites: readonly SportId[]): Selection[] {
+  const favs = SPORT_IDS.filter((s) => favorites.includes(s));
+  const rest = SPORT_IDS.filter((s) => !favorites.includes(s));
+  return ["all", ...favs, ...rest];
+}

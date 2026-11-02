@@ -6,7 +6,15 @@ import { createPortal } from "react-dom";
 import { ArrowRight, Check, X } from "lucide-react";
 import { useSelection } from "@/lib/preferences";
 import { useSwitchUniverse } from "@/lib/use-switch";
-import { SELECTIONS, metaFor, universeHref, type Selection } from "@/lib/universe";
+import { metaFor, orderedSelections, universeHref, type Selection } from "@/lib/universe";
+import { useAuth } from "@/components/auth/AuthProvider";
+
+/** Signed-in users see their favourite sports first (starred). */
+function useOrdered() {
+  const { profile } = useAuth();
+  const favs = profile?.favorite_sports ?? [];
+  return { order: orderedSelections(favs), isFav: (id: Selection) => id !== "all" && favs.includes(id) };
+}
 import { SportBall } from "@/components/art/SportBall";
 import { cn } from "@/lib/cn";
 
@@ -28,9 +36,10 @@ export function UniverseGlyph({ sel }: { sel: Selection }) {
 export function SportSwitcherInline({ className }: { className?: string }) {
   const selection = useSelection();
   const switchTo = useSwitchUniverse();
+  const { order, isFav } = useOrdered();
   return (
     <div className={cn("sport-switch", className)} role="radiogroup" aria-label="Active universe">
-      {SELECTIONS.map((id) => {
+      {order.map((id) => {
         const m = metaFor(id);
         const active = id === selection;
         return (
@@ -39,12 +48,13 @@ export function SportSwitcherInline({ className }: { className?: string }) {
             role="radio"
             aria-checked={active}
             data-sport={id}
-            className={cn("sport-switch__btn", active && "is-active", id === "all" && "sport-switch__btn--all")}
+            className={cn("sport-switch__btn", active && "is-active", id === "all" && "sport-switch__btn--all", isFav(id) && "is-fav")}
             onClick={(e) => switchTo(id, originOf(e))}
-            title={`${m.league} — ${m.themeName}`}
+            title={`${m.league} — ${m.themeName}${isFav(id) ? " (favourite)" : ""}`}
           >
             <span className="sport-switch__dot" aria-hidden="true" />
             {m.short}
+            {isFav(id) && <span className="sr-only"> (favourite)</span>}
           </button>
         );
       })}
@@ -90,6 +100,7 @@ export function SportSwitcherSheet() {
 function SportSheet({ current, onClose }: { current: Selection; onClose: () => void }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const switchTo = useSwitchUniverse();
+  const { order, isFav } = useOrdered();
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -114,7 +125,7 @@ function SportSheet({ current, onClose }: { current: Selection; onClose: () => v
           </button>
         </div>
         <div className="sport-tiles" role="radiogroup" aria-label="Universes">
-          {SELECTIONS.map((id) => {
+          {order.map((id) => {
             const m = metaFor(id);
             const active = id === current;
             return (
@@ -133,7 +144,10 @@ function SportSheet({ current, onClose }: { current: Selection; onClose: () => v
                   <UniverseGlyph sel={id} />
                 </span>
                 <span className="sport-tile__name display">{m.league}</span>
-                <span className="sport-tile__theme">{m.themeName}</span>
+                <span className="sport-tile__theme">
+                  {isFav(id) ? "★ " : ""}
+                  {m.themeName}
+                </span>
                 {active && (
                   <span className="sport-tile__check" aria-hidden="true">
                     <Check size={16} />

@@ -13,6 +13,9 @@ import { Particles } from "@/components/art/Particles";
 import { LogoMark, Wordmark } from "./Logo";
 import { SportSwitcherInline, SportSwitcherSheet } from "./SportSwitcher";
 import { PrefsSync } from "./PrefsSync";
+import { AuthProvider, useAuth } from "@/components/auth/AuthProvider";
+import { UserMenu } from "@/components/auth/UserMenu";
+import { LogIn, UserRound } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 const HISTORY_KEY = "uf:nav-depth";
@@ -23,6 +26,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const collapsed = prefs.sidebarCollapsed;
 
   return (
+    <AuthProvider>
     <div className={cn("shell", collapsed ? "shell--collapsed" : "shell--open")}>
       <a href="#main" className="skip-link">
         Skip to content
@@ -42,6 +46,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </main>
       <BottomNav />
     </div>
+    </AuthProvider>
   );
 }
 
@@ -132,9 +137,12 @@ function TopBar() {
           </>
         )}
       </div>
-      <SportSwitcherInline className="topbar__switch" />
-      <div className="topbar__mobile-switch">
-        <SportSwitcherSheet />
+      <div className="topbar__right">
+        <SportSwitcherInline className="topbar__switch" />
+        <div className="topbar__mobile-switch">
+          <SportSwitcherSheet />
+        </div>
+        <UserMenu />
       </div>
     </header>
   );
@@ -239,6 +247,7 @@ function BottomNav() {
 function MoreSheet({ onClose }: { onClose: () => void }) {
   const pathname = usePathname();
   const { selection, meta } = useUniverse();
+  const { status } = useAuth();
   const panelRef = useRef<HTMLDivElement>(null);
   const secondary = NAV.filter((n) => !n.primaryMobile);
 
@@ -277,6 +286,32 @@ function MoreSheet({ onClose }: { onClose: () => void }) {
               </li>
             );
           })}
+          {status === "signed-in" && (
+            <li>
+              <Link href="/account" className={cn("more-list__link", pathname === "/account" && "is-active")}>
+                <span className="more-list__icon">
+                  <UserRound size={22} aria-hidden="true" />
+                </span>
+                <span>
+                  <strong>Account</strong>
+                  <small>Profile, interests and security</small>
+                </span>
+              </Link>
+            </li>
+          )}
+          {status === "signed-out" && (
+            <li>
+              <Link href="/login" className="more-list__link">
+                <span className="more-list__icon">
+                  <LogIn size={22} aria-hidden="true" />
+                </span>
+                <span>
+                  <strong>Sign in</strong>
+                  <small>Save your universes across devices</small>
+                </span>
+              </Link>
+            </li>
+          )}
         </ul>
       </div>
     </div>,

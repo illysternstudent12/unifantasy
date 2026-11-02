@@ -7,6 +7,7 @@ import { Chip, Reveal, SectionHead } from "@/components/ui/primitives";
 import { useSelection } from "@/lib/preferences";
 import { SPORT_LIST, SPORTS, type SportId } from "@/lib/sports";
 import { PLATFORMS } from "@/lib/platforms";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const STEPS = [
   { title: "Choose a platform", text: "Pick where your league lives. Each platform has its own sign-in or league-ID flow." },
@@ -16,6 +17,8 @@ const STEPS = [
 
 export function ConnectionsView() {
   const current = useSelection();
+  const { profile } = useAuth();
+  const mine = profile?.platforms ?? [];
   // null = follow the active sport (it isn't known until after hydration)
   const [picked, setFilter] = useState<SportId | "all" | null>(null);
   const filter = picked ?? current;
@@ -55,7 +58,10 @@ export function ConnectionsView() {
                   <span className="platform__mono display" aria-hidden="true">
                     {p.name.slice(0, 2)}
                   </span>
-                  <Chip tone="muted">Planned</Chip>
+                  <span className="platform__chips">
+                    {mine.includes(p.id) && <Chip tone="accent">On your list</Chip>}
+                    <Chip tone="muted">Planned</Chip>
+                  </span>
                 </div>
                 <h3 className="panel__title">{p.name}</h3>
                 <p className="platform__method">

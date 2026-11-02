@@ -3,9 +3,10 @@
 An immersive multi-sport fantasy platform for NBA, NFL, Soccer/FPL, MLB, NHL and EuroLeague.
 
 - **Batch 1:** experience foundation — design system, six sport themes, navigation, seven screens.
+- **Batch 3:** accounts — email/password, Google OAuth, password recovery, protected routes, cinematic onboarding, personalised dashboard and navigation, account settings (Supabase Auth + Postgres with Row Level Security).
 - **Batch 2:** Sport Universes — six immersive environments plus an "All Sports" universe, universe-aware switching and terminology, particles, tilt interactions, cinematic universe transitions.
 
-There is still **no** authentication, APIs, database, live sports data, platform integrations or prediction models. Every empty or preview state in the app is labelled as one.
+There are still **no** live sports data, platform integrations or prediction models. Batches 1–2 originally had **no** authentication, APIs, database, live sports data, platform integrations or prediction models. Every empty or preview state in the app is labelled as one.
 
 ## Run
 
@@ -17,6 +18,35 @@ npm run lint
 ```
 
 Stack: Next.js 16 (App Router, Turbopack), React 19.3, TypeScript, plain CSS design tokens, `lucide-react` icons, and `next/font` (Anton, Manrope, JetBrains Mono).
+
+## Auth setup (Batch 3)
+
+Accounts use **Supabase** (managed Auth + Postgres). The app builds and runs without it — auth pages just say accounts aren't connected.
+
+1. **Create a project** at [supabase.com](https://supabase.com) (free tier is fine).
+2. **Create the table + security policies:** open *SQL Editor*, paste `supabase/migrations/0001_profiles.sql`, run it.
+3. **Keys:** copy `.env.example` to `.env.local` and fill in *Project URL* and the *publishable* (anon) key from *Project Settings → API*. Never use the `service_role`/secret key here.
+4. **URLs:** in *Authentication → URL Configuration* set *Site URL* to your site (e.g. `http://localhost:3000`) and add `http://localhost:3000/auth/callback` (plus your production `…/auth/callback`) to *Redirect URLs*.
+5. **Password policy (recommended):** *Authentication → Providers → Email*: keep *Confirm email* on, minimum length 8+, and enable leaked-password protection if your plan has it.
+6. **Google (optional):** create an OAuth client in Google Cloud (authorised redirect URI = the callback URL Supabase shows), enable *Google* under *Authentication → Providers*, then set `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED=true`.
+7. Restart `npm run dev` (public env vars are read at build/start time).
+
+**Acceptance checklist** — register → confirm email → onboarding → finish → dashboard shows "Welcome back" + your sports first in the switcher → sign out → sign in → same universe/preferences → Account edits persist after reload → *Forgot password* email → new password works → `/account` while signed out redirects to sign-in.
+
+### How auth is wired
+
+| Piece | File |
+| --- | --- |
+| Session refresh + optimistic route guards (`/onboarding`, `/account`, `/reset-password`) | `src/proxy.ts` |
+| Authoritative checks (`getUser` validates with Supabase Auth; pages and actions call it) | `src/server/dal.ts` |
+| Server actions: sign up / in / out, reset, change password | `src/app/actions/auth.ts` |
+| Server actions: onboarding + profile writes (validated, own row only) | `src/app/actions/profile.ts` |
+| Email/OAuth landing (`code` or `token_hash`), open-redirect-safe `next` | `src/app/auth/callback/route.ts` |
+| Schema, check constraints, RLS policies, sign-up trigger | `supabase/migrations/0001_profiles.sql` |
+| Shared validation + option lists | `src/lib/profile.ts` |
+| Client session view (UI only — never authorises) | `src/components/auth/AuthProvider.tsx` |
+
+Security notes: passwords go straight to Supabase Auth (hashed there, never stored or logged by the app); only the public URL + publishable key ship to the browser; every profile read/write is limited to `auth.uid() = id` by RLS *and* scoped in code; forgot-password gives the same answer whether or not an account exists; `next` redirects only accept same-site paths; protected pages render per request. Deleting an account needs a server-side admin key and is not included yet.
 
 ## Screens
 
@@ -30,6 +60,9 @@ Stack: Next.js 16 (App Router, Turbopack), React 19.3, TypeScript, plain CSS des
 | `/strategy` | Strategy Lab | Live scoring builder, stat-line calculator, roster construction (pure arithmetic, no projections) |
 | `/copilot` | AI Copilot | Chat UI with per-sport prompts; replies say the engine isn't connected |
 | `/connections` | Platform Connections | Planned platforms by sport; connect buttons disabled, no credentials collected |
+| `/login`, `/register`, `/forgot-password`, `/reset-password` | Auth | Validation, loading/error states, show-password, strength meter, Google button when enabled |
+| `/onboarding` | Onboarding (protected) | 5 steps — name, sports + home universe, platforms, formats, time zone/language/notifications; skippable, progress saved per step |
+| `/account` | Account (protected) | Edit profile, interests, preferences; change password; sign out (this device / everywhere); rerun setup |
 | `/settings` | Settings | Home theme, followed sports, motion (system/reduced/full), parallax, grain, sidebar; saved to localStorage |
 
 ## Architecture
